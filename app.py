@@ -33,18 +33,23 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image uploaded'}), 400
-    image_file = request.files['image']
-    image_bytes = image_file.read()
-    input_data = preprocess_image(image_bytes)
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image uploaded'}), 400
 
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-    interpreter.invoke()
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    prediction = int(np.argmax(output_data))
+        image_file = request.files['image']
+        image_bytes = image_file.read()
+        input_data = preprocess_image(image_bytes)
 
-    return jsonify({'prediction': prediction})
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+        output_data = interpreter.get_tensor(output_details[0]['index'])
+        prediction = int(np.argmax(output_data))
+
+        return jsonify({'prediction': prediction})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

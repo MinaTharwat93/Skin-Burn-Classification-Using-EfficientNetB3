@@ -21,6 +21,16 @@ def preprocess_image(image_bytes):
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
 
+@app.route('/', methods=['GET'])
+def index():
+    return '''
+    <h1>نموذج تصنيف الحروق</h1>
+    <form method="POST" action="/predict" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*">
+        <input type="submit" value="توقع درجة الحرق">
+    </form>
+    '''
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'image' not in request.files:

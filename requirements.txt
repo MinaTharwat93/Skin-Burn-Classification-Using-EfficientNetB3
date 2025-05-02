@@ -1,5 +1,6 @@
-flask
-numpy
-pandas
-tensorflow
-scikit-learn
+fastapi==0.115.12
+uvicorn==0.34.2
+tensorflow==2.14.0
+pillow==10.3.0
+numpy==1.26.4
+python-multipart

@@ -1,82 +1,86 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
 import numpy as np
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from PIL import Image
-import io
-from tensorflow.lite.python.interpreter import Interpreter
+import tensorflow as tf
+from io import BytesIO
+import logging
 
-app = FastAPI()
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-# Load the TensorFlow Lite model
-interpreter = Interpreter(model_path="EfficientNetB3_skin_burn_model.tflite")
-interpreter.allocate_tensors()
+app = FastAPI(title="Skin Burn Classification API")
 
-# Get input and output details
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+# Constants (match notebook)
+IMG_HEIGHT = 240
+IMG_WIDTH = 240
+CLASS_NAMES = ['No Skin burn', '1st degree', '2nd degree', '3rd degree']
 
-# Log input and output details for debugging
-print("Input details:", input_details)
-print("Output details:", output_details)
+# Load TFLite model
+try:
+    interpreter = tf.lite.Interpreter(model_path="EfficientNetB3_skin_burn_model.tflite")
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    logger.info("TFLite model loaded successfully")
+except Exception as e:
+    logger.error(f"Failed to load TFLite model: {str(e)}")
+    raise
 
-# Class labels for burn severity
-labels = ["No Burn", "First Degree", "Second Degree"]
-
-# Function to preprocess the image for INT8 input
 def preprocess_image(image: Image.Image):
-    # Resize the image to the size expected by the model (240x240)
-    image = image.resize((240, 240))
-    # Convert the image to a NumPy array (values in [0, 255])
-    image_array = np.array(image, dtype=np.float32)
-    # Normalize to [0, 1]
-    image_array = image_array / 255.0
-
-    # Get quantization parameters from input details
-    input_scale = input_details[0]['quantization'][0]
-    input_zero_point = input_details[0]['quantization'][1]
-
-    # Quantize the image to INT8
-    if input_scale != 0:  # Avoid division by zero
-        image_array = (image_array / input_scale) + input_zero_point
-    image_array = np.clip(image_array, -128, 127).astype(np.int8)
-
-    # Add batch dimension
-    image_array = np.expand_dims(image_array, axis=0)
-    return image_array
+    """Preprocess image for TFLite model."""
+    try:
+        image = image.convert('RGB').resize((IMG_WIDTH, IMG_HEIGHT))
+        image_array = np.array(image, dtype=np.float32)
+        image_array = tf.keras.applications.efficientnet.preprocess_input(image_array)
+        
+        # Quantize to INT8
+        input_scale = input_details[0]['quantization'][0]
+        input_zero_point = input_details[0]['quantization'][1]
+        if input_scale != 0:
+            image_array = (image_array / input_scale) + input_zero_point
+        image_array = np.clip(image_array, -128, 127).astype(np.int8)
+        
+        image_array = np.expand_dims(image_array, axis=0)
+        return image_array
+    except Exception as e:
+        logger.error(f"Error preprocessing image: {str(e)}")
+        raise
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
+    """Predict skin burn class from uploaded image."""
     try:
-        # Read the image
+        # Read and process image
         contents = await file.read()
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        image = Image.open(BytesIO(contents))
+        image_array = preprocess_image(image)
         
-        # Preprocess the image
-        input_data = preprocess_image(image)
-        
-        # Set the input tensor
-        interpreter.set_tensor(input_details[0]["index"], input_data)
+        # Run inference
+        interpreter.set_tensor(input_details[0]['index'], image_array)
         interpreter.invoke()
+        output_data = interpreter.get_tensor(output_details[0]['index'])
         
-        # Get the output tensor
-        output_data = interpreter.get_tensor(output_details[0]["index"])
-        
-        # Dequantize the output
+        # Dequantize output
         output_scale = output_details[0]['quantization'][0]
         output_zero_point = output_details[0]['quantization'][1]
         dequantized_output = (output_data.astype(np.float32) - output_zero_point) * output_scale
-
-        # Convert to probabilities (if softmax was applied during training)
-        dequantized_output = np.exp(dequantized_output) / np.sum(np.exp(dequantized_output), axis=-1, keepdims=True)
         
-        # Convert to list for JSON response
-        prediction = dequantized_output.tolist()
-        predicted_label = labels[np.argmax(prediction[0])]  # Get the predicted class
+        # Get prediction
+        predicted_class_idx = np.argmax(dequantized_output[0])
+        predicted_class = CLASS_NAMES[predicted_class_idx]
+        probabilities = dequantized_output[0].tolist()
         
-        return JSONResponse(content={"prediction": prediction, "label": predicted_label})
+        # Prepare response
+        response = {
+            "predicted_class": predicted_class,
+            "probabilities": {
+                CLASS_NAMES[i]: prob for i, prob in enumerate(probabilities)
+            }
+        }
+        logger.info(f"Prediction: {response}")
+        return response
+    
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        logger.error(f"Prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")

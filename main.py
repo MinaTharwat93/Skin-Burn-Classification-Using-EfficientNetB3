@@ -4,6 +4,7 @@ from PIL import Image
 import tensorflow as tf
 from io import BytesIO
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,6 +16,7 @@ app = FastAPI(title="Skin Burn Classification API")
 IMG_HEIGHT = 240
 IMG_WIDTH = 240
 CLASS_NAMES = ['No Skin burn', '1st degree', '2nd degree', '3rd degree']
+SUPPORTED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.webp'}
 
 # Load TFLite model
 try:
@@ -50,9 +52,22 @@ def preprocess_image(image: Image.Image):
 async def predict_image(file: UploadFile):
     """Shared prediction logic for POST and GET requests."""
     try:
+        # Check file extension
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if file_extension not in SUPPORTED_IMAGE_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file format. Supported formats: {', '.join(SUPPORTED_IMAGE_EXTENSIONS)}"
+            )
+
         # Read and process image
         contents = await file.read()
-        image = Image.open(BytesIO(contents))
+        try:
+            image = Image.open(BytesIO(contents))
+        except Exception as e:
+            logger.error(f"Invalid or corrupted image file: {str(e)}")
+            raise HTTPException(status_code=400, detail="Invalid or corrupted image file")
+
         image_array = preprocess_image(image)
         
         # Run inference
@@ -80,6 +95,8 @@ async def predict_image(file: UploadFile):
         logger.info(f"Prediction: {response}")
         return response
     
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")

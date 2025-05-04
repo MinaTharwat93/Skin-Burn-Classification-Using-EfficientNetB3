@@ -47,9 +47,8 @@ def preprocess_image(image: Image.Image):
         logger.error(f"Error preprocessing image: {str(e)}")
         raise
 
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    """Predict skin burn class from uploaded image."""
+async def predict_image(file: UploadFile):
+    """Shared prediction logic for POST and GET requests."""
     try:
         # Read and process image
         contents = await file.read()
@@ -84,3 +83,13 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+@app.post("/predict")
+async def predict_post(file: UploadFile = File(...)):
+    """Predict skin burn class from uploaded image via POST."""
+    return await predict_image(file)
+
+@app.get("/predict")
+async def predict_get(file: UploadFile = File(...)):
+    """Predict skin burn class from uploaded image via GET."""
+    return await predict_image(file)

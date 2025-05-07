@@ -28,70 +28,66 @@ except Exception as e:
     logger.error(f"Failed to load TFLite model: {str(e)}")
     raise
 
-# Instructions dictionary with well-formatted first aid (in English) and emergency number
+# Instructions dictionary with first aid as structured object (do and avoid lists)
 instructions = {
     "No Skin burn": {
-        "first_aid": "No visible burn detected in the image. If you experience symptoms or pain, consider consulting a doctor.",
+        "first_aid": {
+            "general": "No visible burn detected in the image. If you experience symptoms or pain, consider consulting a doctor."
+        },
         "emergency_number": "123"
     },
     "1st degree": {
-        "first_aid": """
-✅ What to do:
-["\n"]
-- Place the affected area under cool (not ice-cold) running water for 10-15 minutes.
-["\n"]
-- Apply a soothing cream like aloe vera or panthenol.
-["\n"]
-- Cover the burn with a sterile, loose gauze if needed.
-["\n"]
-- Take over-the-counter pain relievers like paracetamol if there is pain.
-["\n"]
-❌ What to avoid:
-["\n"]
-- Do not apply ice directly to the burn.
-["\n"]
-- Do not use toothpaste, butter, or home remedies.
-["\n"]
-- Do not pop any blisters if they appear.
-["\n"]
-- Do not rub the affected area.
-""",
+        "first_aid": {
+            "do": [
+                "Place the affected area under cool (not ice-cold) running water for 10-15 minutes.",
+                "Apply a soothing cream like aloe vera or panthenol.",
+                "Cover the burn with a sterile, loose gauze if needed.",
+                "Take over-the-counter pain relievers like paracetamol if there is pain."
+            ],
+            "avoid": [
+                "Do not apply ice directly to the burn.",
+                "Do not use toothpaste, butter, or home remedies.",
+                "Do not pop any blisters if they appear.",
+                "Do not rub the affected area."
+            ]
+        },
         "emergency_number": "123"
     },
     "2nd degree": {
-        "first_aid": """
-✅ What to do:
-- Rinse the area with cool running water for 15-30 minutes.
-- Do not pop any blisters if they appear.
-- Apply an antibiotic cream like silver sulfadiazine (after consulting a doctor) and cover the burn with sterile gauze.
-- Take pain relievers and drink plenty of water.
-- Seek medical advice if the burn is large or in a sensitive area (e.g., face or hands).
-
-❌ What to avoid:
-- Do not pop blisters, as this increases the risk of infection.
-- Do not use scented creams or greasy substances like butter.
-- Do not apply adhesive bandages tightly to the burn.
-- Do not leave the burn exposed if it is open.
-""",
+        "first_aid": {
+            "do": [
+                "Rinse the area with cool running water for 15-30 minutes.",
+                "Do not pop any blisters if they appear.",
+                "Apply an antibiotic cream like silver sulfadiazine (after consulting a doctor) and cover the burn with sterile gauze.",
+                "Take pain relievers and drink plenty of water.",
+                "Seek medical advice if the burn is large or in a sensitive area (e.g., face or hands)."
+            ],
+            "avoid": [
+                "Do not pop blisters, as this increases the risk of infection.",
+                "Do not use scented creams or greasy substances like butter.",
+                "Do not apply adhesive bandages tightly to the burn.",
+                "Do not leave the burn exposed if it is open."
+            ]
+        },
         "emergency_number": "123"
     },
     "3rd degree": {
-        "first_aid": """
-❗ Emergency - Call an ambulance immediately (number: 123).
-
-✅ What to do:
-- Remove the person from the source of the burn.
-- Cover the burn with a clean cloth or sterile gauze.
-- Elevate the affected area if possible to reduce swelling.
-- Monitor breathing and pulse until help arrives.
-- Keep the person warm.
-
-❌ What to avoid:
-- Do not apply water or any creams to the burn.
-- Do not attempt to remove clothing stuck to the skin.
-- Do not give food or drink if the person is unconscious.
-- Do not try to clean the burn.
-""",
+        "first_aid": {
+            "do": [
+                "Emergency - Call an ambulance immediately (number: 123).",
+                "Remove the person from the source of the burn.",
+                "Cover the burn with a clean cloth or sterile gauze.",
+                "Elevate the affected area if possible to reduce swelling.",
+                "Monitor breathing and pulse until help arrives.",
+                "Keep the person warm."
+            ],
+            "avoid": [
+                "Do not apply water or any creams to the burn.",
+                "Do not attempt to remove clothing stuck to the skin.",
+                "Do not give food or drink if the person is unconscious.",
+                "Do not try to clean the burn."
+            ]
+        },
         "emergency_number": "123"
     }
 }

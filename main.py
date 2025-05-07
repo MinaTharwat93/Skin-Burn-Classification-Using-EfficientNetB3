@@ -37,15 +37,23 @@ instructions = {
     "1st degree": {
         "first_aid": """
 ✅ What to do:
+["\n"]
 - Place the affected area under cool (not ice-cold) running water for 10-15 minutes.
+["\n"]
 - Apply a soothing cream like aloe vera or panthenol.
+["\n"]
 - Cover the burn with a sterile, loose gauze if needed.
+["\n"]
 - Take over-the-counter pain relievers like paracetamol if there is pain.
-
+["\n"]
 ❌ What to avoid:
+["\n"]
 - Do not apply ice directly to the burn.
+["\n"]
 - Do not use toothpaste, butter, or home remedies.
+["\n"]
 - Do not pop any blisters if they appear.
+["\n"]
 - Do not rub the affected area.
 """,
         "emergency_number": "123"

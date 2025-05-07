@@ -41,7 +41,8 @@ instructions = {
 - Apply a soothing cream like aloe vera or panthenol.
 - Cover the burn with a sterile, loose gauze if needed.
 - Take over-the-counter pain relievers like paracetamol if there is pain.
-
+"""
+"""
 ❌ What to avoid:
 - Do not apply ice directly to the burn.
 - Do not use toothpaste, butter, or home remedies.
@@ -58,7 +59,8 @@ instructions = {
 - Apply an antibiotic cream like silver sulfadiazine (after consulting a doctor) and cover the burn with sterile gauze.
 - Take pain relievers and drink plenty of water.
 - Seek medical advice if the burn is large or in a sensitive area (e.g., face or hands).
-
+"""
+"""
 ❌ What to avoid:
 - Do not pop blisters, as this increases the risk of infection.
 - Do not use scented creams or greasy substances like butter.
@@ -77,7 +79,8 @@ instructions = {
 - Elevate the affected area if possible to reduce swelling.
 - Monitor breathing and pulse until help arrives.
 - Keep the person warm.
-
+"""
+"""
 ❌ What to avoid:
 - Do not apply water or any creams to the burn.
 - Do not attempt to remove clothing stuck to the skin.

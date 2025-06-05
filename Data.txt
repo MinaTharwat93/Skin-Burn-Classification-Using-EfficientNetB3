@@ -1,0 +1,8 @@
+I collect data from this links :
+https://universe.roboflow.com/aibuildersclub/skin-burns-4yoo2/dataset/3
+https://www.kaggle.com/datasets/mohammaddimasnoufal/skin-burn-dataset
+https://www.kaggle.com/datasets/sayeemzzzaman/skin-burn-dataset-cleanedv2
+https://www.kaggle.com/datasets/faresabbasai2022/last-databurn
+https://www.kaggle.com/datasets/faresabbasai2022/skin-burn-dataset
+https://www.kaggle.com/datasets/faresabbasai2022/skin-burns-dataset
+https://www.kaggle.com/datasets/shakyadissanayake/oily-dry-and-normal-skin-types-dataset
